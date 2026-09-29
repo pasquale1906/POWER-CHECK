@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Power Assurance Check - NR 102%</title>
+    <style>
+        :root {
+            --primary: #1b365d;
+            --accent: #2b5b84;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #e0e0e0;
+            --highlight: #eef4fc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 4px 0 0 0;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+            background: #fff;
+        }
+
+        input {
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            outline: none;
+            color: #111;
+        }
+
+        .unit {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #777;
+            margin-left: 8px;
+        }
+
+        .results-card {
+            background: var(--highlight);
+            border: 1px solid #cce0f5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .results-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #c0d4ea;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .result-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .result-subtext {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: right;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Power Assurance Check</h1>
+        <p>NR 102% — Calcolatore Bipolare ITT / NG</p>
+    </div>
+
+    <div class="input-group">
+        <label for="oat">Temperatura Ambientale (OAT)</label>
+        <div class="input-wrapper">
+            <input type="number" id="oat" value="21" step="0.5" min="-10" max="40" oninput="calculate()">
+            <span class="unit">°C</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="pa">Altitudine di Pressione (PA)</label>
+        <div class="input-wrapper">
+            <input type="number" id="pa" value="79" step="10" min="-1000" max="2000" oninput="calculate()">
+            <span class="unit">ft</span>
+        </div>
+    </div>
+
+    <div class="results-card">
+        <div class="results-title">Risultati Interpolati</div>
+        
+        <div class="result-row">
+            <span class="result-label">ITT</span>
+            <div>
+                <span class="result-value" id="itt-val">667.5</span> <span class="unit">°C</span>
+                <div class="result-subtext" id="itt-round">Arrotondato: 668 °C</div>
+            </div>
+        </div>
+
+        <div class="result-row">
+            <span class="result-label">NG</span>
+            <div>
+                <span class="result-value" id="ng-val">92.39</span> <span class="unit">%</span>
+                <div class="result-subtext" id="ng-round">Arrotondato: 92.4 %</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Utilizzabile Offline • Salvabile sulla Schermata Home
+    </div>
+</div>
+
+<script>
+const temps = [-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40];
+const alts = [-1000, -500, 0, 500, 1000, 1500, 2000];
+
+const table = {
+    "-10": [[569,87.7], [572,88.0], [576,88.2], [580,88.4], [582,88.7], [585,89.0], [590,89.2]],
+    "-8":  [[575,88.0], [578,88.2], [583,88.5], [586,88.6], [588,88.9], [591,89.2], [596,89.5]],
+    "-6":  [[581,88.2], [584,88.5], [589,88.7], [592,88.9], [594,89.2], [597,89.5], [602,89.7]],
+    "-4":  [[588,88.5], [590,88.7], [595,89.0], [598,89.2], [600,89.5], [603,89.7], [607,90.0]],
+    "-2":  [[593,88.7], [596,89.0], [600,89.2], [604,89.5], [606,89.8], [609,90.0], [613,90.2]],
+    "0":   [[598,89.0], [602,89.3], [606,89.5], [610,89.7], [612,90.0], [615,90.2], [619,90.5]],
+    "2":   [[604,89.3], [608,89.5], [612,89.8], [616,90.0], [617,90.2], [620,90.5], [625,90.7]],
+    "4":   [[610,89.5], [614,89.8], [618,90.1], [621,90.3], [623,90.5], [626,90.8], [630,91.0]],
+    "6":   [[617,89.8], [620,90.1], [624,90.3], [626,90.5], [628,90.8], [632,91.0], [636,91.3]],
+    "8":   [[623,90.1], [626,90.4], [629,90.6], [631,90.9], [634,91.0], [638,91.3], [642,91.6]],
+    "10":  [[630,90.4], [632,90.7], [634,90.9], [637,91.1], [640,91.3], [644,91.6], [648,91.9]],
+    "12":  [[635,90.6], [637,91.0], [640,91.1], [643,91.3], [646,91.5], [650,91.9], [653,92.1]],
+    "14":  [[641,90.9], [643,91.2], [646,91.4], [649,91.6], [652,91.8], [655,92.2], [659,92.4]],
+    "16":  [[646,91.2], [648,91.5], [652,91.7], [655,91.9], [658,92.2], [661,92.5], [665,92.7]],
+    "18":  [[652,91.5], [654,91.8], [658,92.0], [661,92.2], [664,92.5], [667,92.7], [671,93.0]],
+    "20":  [[658,91.7], [660,92.0], [664,92.2], [667,92.5], [670,92.7], [673,93.0], [677,93.2]],
+    "22":  [[664,91.9], [665,92.2], [670,92.5], [673,92.7], [676,93.0], [679,93.2], [683,93.5]],
+    "24":  [[669,92.2], [671,92.5], [675,92.8], [678,93.0], [682,93.2], [685,93.5], [690,93.7]],
+    "26":  [[675,92.5], [677,92.7], [680,93.0], [684,93.2], [688,93.5], [691,93.8], [695,94.0]],
+    "28":  [[680,92.8], [683,93.0], [686,93.2], [690,93.5], [694,93.7], [697,94.0], [700,94.2]],
+    "30":  [[685,93.0], [689,93.2], [692,93.5], [696,93.8], [700,94.0], [703,94.2], [706,94.5]],
+    "32":  [[691,93.2], [695,93.5], [698,93.7], [702,94.0], [705,94.3], [708,94.5], [711,94.7]],
+    "34":  [[697,93.5], [701,93.7], [704,94.0], [708,94.3], [711,94.6], [713,94.7], [717,95.0]],
+    "36":  [[704,93.8], [707,94.0], [710,94.3], [713,94.6], [716,94.9], [718,95.0], [723,95.3]],
+    "38":  [[710,94.0], [713,94.2], [716,94.5], [719,94.8], [722,95.1], [725,95.3], [729,95.6]],
+    "40":  [[715,94.2], [719,94.5], [721,94.8], [725,95.1], [728,95.3], [731,95.6], [735,95.9]]
+};
+
+function lerp(a, b, t) {
+    return a + t * (b - a);
+}
+
+function calculate() {
+    let oat = parseFloat(document.getElementById('oat').value);
+    let pa = parseFloat(document.getElementById('pa').value);
+
+    if (isNaN(oat) || isNaN(pa)) return;
+
+    // Clamp values
+    oat = Math.max(-10, Math.min(40, oat));
+    pa = Math.max(-1000, Math.min(2000, pa));
+
+    // Find Temp bounds
+    let tIdx = 0;
+    while (tIdx < temps.length - 2 && temps[tIdx + 1] <= oat) tIdx++;
+    let t1 = temps[tIdx], t2 = temps[tIdx + 1];
+    let tRatio = (t2 === t1) ? 0 : (oat - t1) / (t2 - t1);
+
+    // Find Alt bounds
+    let aIdx = 0;
+    while (aIdx < alts.length - 2 && alts[aIdx + 1] <= pa) aIdx++;
+    let a1 = alts[aIdx], a2 = alts[aIdx + 1];
+    let aRatio = (a2 === a1) ? 0 : (pa - a1) / (a2 - a1);
+
+    // Get 4 corner points
+    let p11 = table[t1][aIdx];     // [ITT, NG] at (T1, A1)
+    let p21 = table[t2][aIdx];     // [ITT, NG] at (T2, A1)
+    let p12 = table[t1][aIdx + 1]; // [ITT, NG] at (T1, A2)
+    let p22 = table[t2][aIdx + 1]; // [ITT, NG] at (T2, A2)
+
+    // Bilinear Interpolation for ITT
+    let itt_a1 = lerp(p11[0], p21[0], tRatio);
+    let itt_a2 = lerp(p12[0], p22[0], tRatio);
+    let itt = lerp(itt_a1, itt_a2, aRatio);
+
+    // Bilinear Interpolation for NG
+    let ng_a1 = lerp(p11[1], p21[1], tRatio);
+    let ng_a2 = lerp(p12[1], p22[1], tRatio);
+    let ng = lerp(ng_a1, ng_a2, aRatio);
+
+    // Render results
+    document.getElementById('itt-val').innerText = itt.toFixed(2);
+    document.getElementById('itt-round').innerText = 'Arrotondato: ' + Math.round(itt) + ' °C';
+
+    document.getElementById('ng-val').innerText = ng.toFixed(2);
+    document.getElementById('ng-round').innerText = 'Arrotondato: ' + ng.toFixed(1) + ' %';
+}
+
+calculate();
+</script>
+</body>
+</html>
